@@ -1,0 +1,21 @@
+struct Pokemon {
+    u32 	pid;
+    u32 	otid;
+    u8 	nick[10];
+    u16 	lang;
+    u8 	otname[7];
+    u8 		markings;
+    u16 	checksum;
+    u16 	unused;
+    u8  	data[48];
+    u32 	status;
+    u8 		level;
+    u8 		pokerus;
+    u16 	current_hp;
+    u16 	total_hp;
+    u16 	atk;
+    u16 	def;
+    u16 	spd;
+    u16 	spatk;
+    u16 	spdef;
+};
