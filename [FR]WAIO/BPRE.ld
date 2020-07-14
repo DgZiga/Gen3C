@@ -1,0 +1,12 @@
+add_task_game_freak = 0x0807741C|1;
+del_task_game_freak = 0x08077508|1;
+flag_check = 0x0806E6D0|1;
+script_exec_env_2 = 0x08069B48|1;
+script_exec_env_1 = 0x08069804|1;
+play_sound = 0x080722CC|1;
+memset = 0x081E5ED8|1;
+get_script_by_npc_id = 0x0805FC38|1;
+task_is_running = 0x08077650|1;
+get_task_id_by_ptr = 0x08077688|1;
+person_id_by_npc_id = 0x0805FC74|1;
+rand = 0x08044EC8|1;

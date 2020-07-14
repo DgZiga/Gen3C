@@ -1,0 +1,5 @@
+- in hooker.s va messo l'indirizzo di check_showsprite_every_step
+- a 0x0806D5F6 va messo 01 4A 10 47 00 00 XX XX XX XX dove "XXXXXXXX" è l'indirizzo di MAIN (hooker.s)
+- in main.c vanno messi:
+    - in exec all'inizio l'indirizzo di second_step
+    - in exec e wildbattle_on_a_press il numero di passi

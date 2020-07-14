@@ -1,0 +1,34 @@
+.thumb
+.align 2
+
+.equ c_main_addr, 0x08805369
+
+MAIN:
+PUSH {r0-r5}
+LDR r3, =c_main_addr
+BL CALL_USING_R3
+
+END:
+POP {r0-r5}
+LSL r0, r0, #0x18
+LSR r0, r0, #0x18
+CMP r0, #0x1
+BEQ BRANCHER
+MOV r0, r5
+MOV r1, r4
+LDR r3, =0x0806DA11
+BL CALL_USING_R3
+LSL r0, r0, #0x18
+LSR r0, r0, #0x18
+CMP r0, #0x1
+BEQ BRANCHER
+MOV r0, r4
+LDR r0, =0x0806D611
+BX r0
+
+BRANCHER:
+LDR r0, =0x0806D651
+BX r0
+
+CALL_USING_R3:
+BX r3
