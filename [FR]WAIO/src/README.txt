@@ -3,3 +3,4 @@
 - in main.c vanno messi:
     - in exec all'inizio l'indirizzo di second_step
     - in exec e wildbattle_on_a_press il numero di passi
+- in BPRE.ld va messo l'indirizzo di "MOD" (div.s)
