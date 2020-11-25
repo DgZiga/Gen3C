@@ -13,31 +13,58 @@ void * get_script_by_npc_id(u16 npc_id);
 u8 task_is_running(void *task_ptr);
 void del_task_game_freak(u8 tid);
 u8 get_task_id_by_ptr(void (*exec_ptr)(u8));
-u16 person_id_by_npc_id(u16 npc_id);
+u16 person_id_by_npc_id_and_map_and_bank(u8 npc_id, u8 map, u8 bank);
 u32 rand();
+void lock_movement(struct Npc_state *npc_state);
+void release_movement(struct Npc_state *npc_state);
+u32 mod(u32 a, u32 b);
 
 // Check if the player is in range of a valid random encounter
 void exec(u8 tid) {
 	struct Script_state *env1 = (struct Script_state *)0x03000EB0;
-	void (*second_step_ptr)(u8) = (void (*)(u8))0x08805209;
+	void (*second_step_ptr)(u8) = (void (*)(u8))0x0880664D;			/*REMEMBER TO CHANGE THIS UPON COMPILATION*/
 	
-	if(env1->continue_exec || task_is_running(second_step_ptr)){ //If a script or the second step are running, don't run this task
+	if(env1->continue_exec || task_is_running(second_step_ptr)){ //If a script or the second step are running, don't run this task, as it would trigger multiple fights 
 		return;
 	}
 	
-	struct Npc_state *npc_state = (struct Npc_state *)0x02036E38;
-	struct Npc_state player = *npc_state;
+	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)(0x02029314 /*Start_of_box*/ + 0x5DE0 /*Box #10*/ + 0x28*5 /*Task_engine_len*/); //0x202F1BC REMEMBER TO CHANGE THIS TO A FREE RAM SLOT
+	struct Npc_state *npc_state = (struct Npc_state *)0x02036E38;	//Start of NPC_STATE
+	struct Npc_state player = *npc_state;							//First NPC_STATE is always the Player
 	
-	void *opponent_party = (void *)0x0202402C; //We'll use this as free space: the first 2 bytes will hold the active npc, and the others will contain the applymovement script
-	u16 *npc_id_slot = (u16 *)opponent_party;
-	u8 *precompiled_script_slot = (u8 *)opponent_party+2;
+	/*We'll use the opponent's party as free space: the first 8 bytes will hold the offset of active npc in RAM, and the others will contain the applymovement script.
+	We can use the opponent's party as free space because it will only get written over when entering a battle, but by then we won't be needing the information we're storing there anymore*/
+	void *opponent_party = (void *)0x0202402C; 
+	struct Npc_state **npc_id_slot = (struct Npc_state **)opponent_party;
+	u8 *precompiled_script_slot = (u8 *)opponent_party+4;
 	u8 *precompiled_script_slot_iterable = precompiled_script_slot;
 	
 	u16 player_x = player.to_coord.x;
 	u16 player_y = player.to_coord.y;
 	
 	while(npc_state->map_no != 0xFF || npc_state->map_bank != 0xFF || npc_state->local_id != 0xFF){ //If any if these condition is true, then we have reached the end of the npc_state tbl
-		if(npc_state->is_trainer == 0 && npc_state->sight_distance != 0){
+		/*Check that the NPC is:
+			1) NOT a trainer (otherwise a standard trainer battle should happen)
+			2) HAS sight (if both this and 1 are satisfied, then the NPC is a valid target for the routine
+			3) Its second bit in the bitfield is not set (if it's set the NPC is moving: running the routine on a moving NPC could cause bugs) */
+		if(npc_state->is_trainer == 0 && npc_state->sight_distance != 0 && (npc_state->bitfield & 2) == 0){ 
+			
+			/*
+			Ignore NPCs that are are hidden
+			*/
+			u8 isInCountdown = 0;
+			for(u8 i = 0; i<10; i++){
+				if(npc_show_ctdwn[i].person_id == person_id_by_npc_id_and_map_and_bank(npc_state->local_id, npc_state->map_no, npc_state->map_bank)){ //person_id_by_npc_id
+					isInCountdown = 1;
+					break;
+				}
+			}
+			if(isInCountdown){
+				npc_state++;
+				continue;
+			}
+			
+			/*Utility vars*/
 			u16 npc_x = npc_state->to_coord.x;
 			u16 npc_y = npc_state->to_coord.y;
 			u16 npc_r = npc_state->sight_distance;
@@ -45,7 +72,7 @@ void exec(u8 tid) {
 			u8 direction = 0;
 			u8 diff = 0;
 			
-			//Coordinates checks
+			//Coordinates checks: check if the player can be seen by the NPC
 			if(npc_dir == 0x11 &&
 			   npc_x == player_x &&
 			   npc_y + npc_r >= player_y && 
@@ -75,22 +102,28 @@ void exec(u8 tid) {
 				direction = 0x13;
 			}
 			
-			if(direction){
-				*npc_id_slot = npc_state->local_id; //Store npcId for second_step
+			if(direction){ //If direction != 0, then the player can be seen by an NPC
+								
+				lock_movement(npc_state);	//Stop NPC animation
+				
+				u8 *walkrun_lock = (u8 *)0x0203707E;	//Prevent player from moving
+				*walkrun_lock = 0x1;
+				
+				*npc_id_slot = npc_state; //Store npcId for second_step
 				
 				//Load applymovement script into memory and exec it from there
-				u8 script[] = {0x4F /*applymovement*/, npc_state->local_id, 0x00, 0x36, 0x40, 0x02, 0x02, 0x02};
+				u8 script[] = {0x4F /*applymovement*/, npc_state->local_id, 0x00, 0x36, 0x40, 0x02, 0x02, 0x02 /*end*/};
 				for(u8 i=0; i<sizeof(script); i++){
 					*precompiled_script_slot_iterable = script[i];
 					precompiled_script_slot_iterable++;
 				}
 				u8 i;
-				for(i=0; i<diff-1; i++){
+				for(i=0; i<diff-1; i++){	//Add as many 'walk' directives as needed
 					*(precompiled_script_slot_iterable +i) = direction;
 				}
 				*(precompiled_script_slot_iterable +i) = 0xFE;
 				
-				
+				//Execute the script
 				env1->continue_exec = 1;
 				env1->next_offset = (u32)precompiled_script_slot;
 				script_exec_env_1(env1);
@@ -110,14 +143,14 @@ void second_step(u8 tid){
 	struct Script_state *env1 = (struct Script_state *)0x03000EB0;
 	void *exec_applymovement_func = (void *)(0x080977AC|1); //Task called by the game engine that actually executes the applymovement cmd; for some reason if this is active wildbattles will fail
 	
-	u16 *npc_id_slot = (u16 *)0x0202402C; //which is really the opponent_party, see the first task for an explanation
+	struct Npc_state **npc_id_slot = (struct Npc_state **)0x0202402C; //which is really the opponent_party, see the first task for an explanation
 	
-	void *precompiled_script_slot = (void *)0x0202F1E4;
+	void *precompiled_script_slot = (void *)0x0202F1E4;		//Any Free RAM slot will do
 	void *precompiled_script_slot_iterable = precompiled_script_slot;
 	
-	struct Npc_state *npc_state = (struct Npc_state *)0x02036E38;
-	struct Npc_state player = *npc_state;
-	struct Npc_state npc = *(npc_state+ *npc_id_slot);
+	struct Npc_state *npc_state = (struct Npc_state *)0x02036E38;	//Start of NPC_STATE
+	struct Npc_state player = *npc_state;				            //First NPC_STATE is always the Player
+	struct Npc_state npc = **npc_id_slot;							//Retrieve the NPC_STATE of the NPC the player is about to fight
 	
 	struct Wild_enocunter_tbl *encounter_tbl = (struct Wild_enocunter_tbl *)0x08FFD8E0; //last 10Kb of the ROM, to be sure
 	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)(0x02029314 /*Start_of_box*/ + 0x5DE0 /*Box #10*/ + 0x28*5 /*Task_engine_len*/);
@@ -133,14 +166,14 @@ void second_step(u8 tid){
 		del_task_game_freak(get_task_id_by_ptr(exec_applymovement_func)); //For some reason if this task exists wildbattle will fail
 		
 		//Lookup wild encounter tbl
-		u16 person_id = person_id_by_npc_id(npc.local_id);
+		u16 person_id = person_id_by_npc_id_and_map_and_bank(npc.local_id, npc.map_no, npc.map_bank);
 		while(encounter_tbl->person_id != person_id){
 			encounter_tbl++;
 		}
 		
 		struct Encounter selected_encounter;
 		do{	//Choose a random encounter
-			u8 selected_pkmn = rand() % sizeof(encounter_tbl->encounters);
+			u8 selected_pkmn = mod(rand(), 4);
 			selected_encounter = encounter_tbl->encounters[selected_pkmn];
 		}while (selected_encounter.species == 0xFFFF);
 		
@@ -149,11 +182,11 @@ void second_step(u8 tid){
 			if(npc_show_ctdwn[i].person_id != 0){
 				continue;
 			}
-			npc_show_ctdwn[i] = (struct Npc_show_countdown) {person_id, 3};
+			npc_show_ctdwn[i] = (struct Npc_show_countdown) {person_id, 10};
 			break;
 		}
 	    
-		//Load "hidesprite" and wildbattle script into memory and exec it
+		//Load hidesprite and wildbattle script into memory and exec it
 		
 		*((u8 *)precompiled_script_slot_iterable) = 0x29; //setflag
 		precompiled_script_slot_iterable++;
@@ -167,46 +200,44 @@ void second_step(u8 tid){
 		precompiled_script_slot_iterable++;
 		*((u16 *)precompiled_script_slot_iterable) = 0x0000; 
 		precompiled_script_slot_iterable+= 2;
+		*((u8 *)precompiled_script_slot_iterable) = 0x53; //hidesprite
+		precompiled_script_slot_iterable++;
+		*((u16 *)precompiled_script_slot_iterable) = npc.local_id; 
+		precompiled_script_slot_iterable += 2;
 		*((u8 *)precompiled_script_slot_iterable) = 0xB7; //dowildbattle
 		precompiled_script_slot_iterable++;
 		*((u8 *)precompiled_script_slot_iterable) = 0x02; //end
-		
 		del_task_game_freak(tid); //Delete this task
 		
 		env1->next_offset = (u32)precompiled_script_slot;
 		env1->continue_exec = 1;
 		script_exec_env_1(env1);
+		
+		release_movement(*npc_id_slot);	//Resume NPC movement (even if hidden)
+		u8 *walkrun_lock = (u8 *)0x0203707E;	//allow the player to move again
+		*walkrun_lock = 0x0;
 	}
 }
 
 //To be executed at every step (see /src/hooker.s and /hooks), checks if any npc had its countdown expire and, should that be the case, execs a showsprite
 void check_showsprite_every_step(){
-	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)(0x02029314 /*Start_of_box*/ + 0x5DE0 /*Box #10*/ + 0x28*5 /*Task_engine_len*/);
-	void *precompiled_script_slot = (void *)0x0202F1E4 + 1; //+1 because we want 0x55 (showsprite command) not to be 2-Aligned, so that we can write the npcId as a halfword later
+	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)(0x02029314 /*Start_of_box*/ + 0x5DE0 /*Box #10*/ + 0x28*5 /*Task_engine_len*/);	//Any free RAM will do
+	void *precompiled_script_slot = (void *)0x0202F2E4 + 1; //Any Free RAM slot will do
 	void *precompiled_script_slot_iterable = precompiled_script_slot;
 	struct Script_state *env1 = (struct Script_state *)0x03000EB0;
 	
-	for(u8 i = 0; i<10; i++){
-		if(npc_show_ctdwn[i].person_id == 0){ 
+	for(u8 i = 0; i<10; i++){	//For every countdown position
+		if(npc_show_ctdwn[i].person_id == 0){ //Avoid empty countdown positions
 			continue;
 		}
-		npc_show_ctdwn[i].steps_no--;
+		npc_show_ctdwn[i].steps_no--;	//Decrease the number of steps needed
 		
-		if(npc_show_ctdwn[i].steps_no == 0){
-			/* *((u8 *)precompiled_script_slot_iterable) = 0x55; //showsprite
-			precompiled_script_slot_iterable++;
-			*((u16 *)precompiled_script_slot_iterable) = npc_show_ctdwn[i].npc_id; 
-			precompiled_script_slot_iterable += 2;
-			*((u8 *)precompiled_script_slot_iterable) = 0x55; //showsprite
-			*/
-			
+		/*Clearflag shows the sprite on the step AFTER it's executed, so execute it on the third-to-last step, so that on the second-to-last, the sprite will show itself and on the last step it will activate*/
+		if(npc_show_ctdwn[i].steps_no == 2){	
+		
 			*((u8 *)precompiled_script_slot_iterable) = 0x2A; //clearflag
 			precompiled_script_slot_iterable++;
 			*((u16 *)precompiled_script_slot_iterable) = npc_show_ctdwn[i].person_id; 
-			precompiled_script_slot_iterable += 2;
-			*((u8 *)precompiled_script_slot_iterable) = 0x25; //special
-			precompiled_script_slot_iterable++;
-			*((u16 *)precompiled_script_slot_iterable) = 0x8E; //Special 0x8E refreshes screen
 			precompiled_script_slot_iterable += 2;
 			*((u8 *)precompiled_script_slot_iterable) = 0x02; //end
 			
@@ -214,6 +245,8 @@ void check_showsprite_every_step(){
 			env1->continue_exec = 1;
 			script_exec_env_1(env1);
 		
+		} 
+		if(npc_show_ctdwn[i].steps_no == 0){	//Remove the personId from the countdown section, so that it can battle again
 			npc_show_ctdwn[i].person_id = 0;
 		}
 	}
@@ -222,24 +255,29 @@ void check_showsprite_every_step(){
 //To be called by a callasm by every npc that is a wild pokémon, in case the player actively interacts with them
 void wildbattle_on_a_press(){
 	
-	u16 *current_npc = (u16 *)0x03005074;
-	struct Wild_enocunter_tbl *encounter_tbl = (struct Wild_enocunter_tbl *)0x08FFD8E0; //last 10Kb of the ROM, to be sure*/
-	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)(0x02029314 /*Start_of_box*/ + 0x5DE0 /*Box #10*/ + 0x28*5 /*Task_engine_len*/);
+	u16 *current_npc  = (u16 *)0x03005074;
+	u8  *current_bank  = (u8  *)0x02025530;
+	u8  *current_map  = (u8  *)0x02025531;	
+	struct Npc_state *npc_state = (struct Npc_state *)0x02036E38;	//Start of NPC_STATE
+	struct Npc_state *npc = npc_state + *current_npc;
+
+	struct Wild_enocunter_tbl *encounter_tbl = (struct Wild_enocunter_tbl *)0x08FFD8E0; //last 10Kb of the ROM, to be sure*/ 
+	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)(0x02029314 /*Start_of_box*/ + 0x5DE0 /*Box #10*/ + 0x28*5 /*Task_engine_len*/); //Any Free RAM slot will do
 	
-	void *precompiled_script_slot = (void *)0x0202F1E4;
+	void *precompiled_script_slot = (void *)0x0202F1E4; //Any Free RAM slot will do
 	void *precompiled_script_slot_iterable = precompiled_script_slot;
 	
 	struct Script_state *env1 = (struct Script_state *)0x03000EB0;
 	
 	//Lookup wild encounter tbl
-	u16 person_id = person_id_by_npc_id(*current_npc);
+	u16 person_id = person_id_by_npc_id_and_map_and_bank(npc->local_id, *current_map, *current_bank);
 	while(encounter_tbl->person_id != person_id){
 		encounter_tbl++;
 	}
 	
 	struct Encounter selected_encounter;
 	do{	//Choose a random encounter
-		u8 selected_pkmn = rand() % sizeof(encounter_tbl->encounters);
+		u8 selected_pkmn = mod(rand(), 4);
 		selected_encounter = encounter_tbl->encounters[selected_pkmn];
 	}while (selected_encounter.species == 0xFFFF);
 	
@@ -248,7 +286,7 @@ void wildbattle_on_a_press(){
 		if(npc_show_ctdwn[i].person_id != 0){
 			continue;
 		}
-		npc_show_ctdwn[i] = (struct Npc_show_countdown) {person_id, 3};
+		npc_show_ctdwn[i] = (struct Npc_show_countdown) {person_id, 10};
 		break;
 	}
 	
@@ -266,6 +304,10 @@ void wildbattle_on_a_press(){
 	precompiled_script_slot_iterable++;
 	*((u16 *)precompiled_script_slot_iterable) = 0x0000; 
 	precompiled_script_slot_iterable+= 2;
+	*((u8 *)precompiled_script_slot_iterable) = 0x53; //hidesprite
+	precompiled_script_slot_iterable++;
+	*((u16 *)precompiled_script_slot_iterable) = npc->local_id; 
+	precompiled_script_slot_iterable += 2;
 	*((u8 *)precompiled_script_slot_iterable) = 0xB7; //dowildbattle
 	precompiled_script_slot_iterable++;
 	*((u8 *)precompiled_script_slot_iterable) = 0x02; //end

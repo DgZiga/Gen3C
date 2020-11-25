@@ -1,15 +1,16 @@
 .thumb
 .align 2
 
-.equ c_main_addr, 0x08805369
+.equ check_showsprite_every_step, 0x088067E5
 
 MAIN:
 PUSH {r0-r5}
-LDR r3, =c_main_addr
+LDR r3, =check_showsprite_every_step
 BL CALL_USING_R3
 
 END:
 POP {r0-r5}
+/*Instructions from 0x806D5F6*/
 LSL r0, r0, #0x18
 LSR r0, r0, #0x18
 CMP r0, #0x1
