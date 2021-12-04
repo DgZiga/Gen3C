@@ -1,11 +1,38 @@
+.gba
+.thumb
+.open "./BPRE0.gba","./multi.gba", 0x08000000
+
+
+
+.org 0x0806D5F6
+.thumb
+.align 2
+LDR r0, =MAIN|1
+BX r0
+MOV r0, r0
+.pool
+
+
+
+
+
+
+
+.org 0x08810000/*
 .thumb
 .align 2
 
-.equ check_showsprite_every_step, 0x088067E5
+mod:
+PUSH {lr}
+SWI 0x6
+MOV r0, r1
+POP {r1}
+BX r1*/
+.importobj "./build/linked.o"
 
 MAIN:
 PUSH {r0-r5}
-LDR r3, =check_showsprite_every_step
+LDR r3, =check_showsprite_every_step|1
 BL CALL_USING_R3
 
 END:
@@ -33,3 +60,6 @@ BX r0
 
 CALL_USING_R3:
 BX r3
+
+.pool
+.close

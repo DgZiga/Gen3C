@@ -1,3 +1,8 @@
+__aeabi_idiv = 0x081E3B68|1;
+__aeabi_idivmod = 0x081E3B68|1;
+__aeabi_uidiv = 0x081E3B68|1;
+__aeabi_uidivmod = 0x081E3B68|1;
+
 add_task_game_freak 					= 0x0807741C|1;
 del_task_game_freak 					= 0x08077508|1;
 flag_check 								= 0x0806E6D0|1;
@@ -12,5 +17,4 @@ person_id_by_npc_id 					= 0x0805FC74|1;
 person_id_by_npc_id_and_map_and_bank 	= 0x0805FC5C|1;
 rand 									= 0x08044EC8|1;
 lock_movement 							= 0x080688E4|1;
-mod 									= 0x08806400|1;
 release_movement 						= 0x080689F4|1;

@@ -1,3 +1,6 @@
+#ifndef WILD_ENC_CUST_TBL_H
+#define WILD_ENC_CUST_TBL_H
+
 struct Encounter{
 	u16 species;
 	u8 lvl;
@@ -8,3 +11,4 @@ struct Wild_enocunter_tbl{
 	u16 person_id;
 	struct Encounter encounters[4];
 };
+#endif

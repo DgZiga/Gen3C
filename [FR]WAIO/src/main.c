@@ -1,34 +1,27 @@
-#include "types.h"
-#include "include/npc_state.h"
-#include "include/script_state.h"
-#include "include/wild_encounter_custom_table.h"
-#include "include/npc_show_countdown.h"
+#include "main.h"
 
-u8 flag_check(u16 flag_id);
-void add_task_game_freak(void (*exec_ptr)(u8), u8 priority);
-void script_exec_env_1(void *ptr);
-void script_exec_env_2(void *ptr);
-void play_sound(u32 sound_id);
-void * get_script_by_npc_id(u16 npc_id);
-u8 task_is_running(void *task_ptr);
-void del_task_game_freak(u8 tid);
-u8 get_task_id_by_ptr(void (*exec_ptr)(u8));
-u16 person_id_by_npc_id_and_map_and_bank(u8 npc_id, u8 map, u8 bank);
-u32 rand();
-void lock_movement(struct Npc_state *npc_state);
-void release_movement(struct Npc_state *npc_state);
-u32 mod(u32 a, u32 b);
+//Too lazy to actually link ASM properly, using gcc extended ASM syntax
+u32 mod(u32 a, u32 b){
+	int res;
+	asm ("MOV r0, %1\n"
+		"MOV r1, %2\n"
+		"SWI 0x6\n"
+		"MOV %0, r1\n"
+		: "=r"(res)
+		: "r"(a), "r"(b));
+	return res;
+}
 
 // Check if the player is in range of a valid random encounter
 void exec(u8 tid) {
 	struct Script_state *env1 = (struct Script_state *)0x03000EB0;
-	void (*second_step_ptr)(u8) = (void (*)(u8))0xAAAAAAAA;			/*REMEMBER TO CHANGE THIS UPON COMPILATION*/
+	void (*second_step_ptr)(u8) = &second_step;			
 	
 	if(env1->continue_exec || task_is_running(second_step_ptr)){ //If a script or the second step are running, don't run this task, as it would trigger multiple fights 
 		return;
 	}
 	
-	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)0xBBBBBBBB; //0x28 free bytes in RAM
+	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)NPC_CTDWN_ADDR; 
 	struct Npc_state *npc_state = (struct Npc_state *)0x02036E38;	//Start of NPC_STATE
 	struct Npc_state player = *npc_state;							//First NPC_STATE is always the Player
 	
@@ -146,15 +139,15 @@ void second_step(u8 tid){
 	
 	struct Npc_state **npc_id_slot = (struct Npc_state **)0x0202402C; //which is really the opponent_party, see the first task for an explanation
 	
-	void *precompiled_script_slot = (void *)0xCCCCCCCC;		//0xE free bytes in RAM
+	void *precompiled_script_slot = (void *)PREC_SCRIPT_SLOT;
 	void *precompiled_script_slot_iterable = precompiled_script_slot;
 	
 	struct Npc_state *npc_state = (struct Npc_state *)0x02036E38;	//Start of NPC_STATE
 	struct Npc_state player = *npc_state;				            //First NPC_STATE is always the Player
 	struct Npc_state npc = **npc_id_slot;							//Retrieve the NPC_STATE of the NPC the player is about to fight
 	
-	struct Wild_enocunter_tbl *encounter_tbl = (struct Wild_enocunter_tbl *)0xDDDDDDDD; //Start of encounter_tbl in ROM
-	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)0xBBBBBBBB; //0x28 free bytes in RAM
+	struct Wild_enocunter_tbl *encounter_tbl = (struct Wild_enocunter_tbl *)ENC_TBL_ADDR; //Start of encounter_tbl in ROM
+	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)NPC_CTDWN_ADDR; 
 	
 	u16 diff_x = player.from_coord.x - npc.from_coord.x;
 	u16 diff_y = player.from_coord.y - npc.from_coord.y;
@@ -222,8 +215,8 @@ void second_step(u8 tid){
 
 //To be executed at every step (see /src/hooker.s and /hooks), checks if any npc had its countdown expire and, should that be the case, execs a showsprite
 void check_showsprite_every_step(){
-	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)0xBBBBBBBB; //0x28 free bytes in RAM
-	void *precompiled_script_slot = (void *)0xCCCCCCCC;		//0x4 free bytes in RAM
+	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)NPC_CTDWN_ADDR;
+	void *precompiled_script_slot = (void *)PREC_SCRIPT_SLOT2;		
 	void *precompiled_script_slot_iterable = precompiled_script_slot;
 	struct Script_state *env1 = (struct Script_state *)0x03000EB0;
 	
@@ -263,10 +256,10 @@ void wildbattle_on_a_press(){
 	struct Npc_state *npc_state = (struct Npc_state *)0x02036E38;	//Start of NPC_STATE
 	struct Npc_state *npc = npc_state + *current_npc;
 
-	struct Wild_enocunter_tbl *encounter_tbl = (struct Wild_enocunter_tbl *)0xDDDDDDDD; //Start of encounter_tbl in ROM
-	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)0xBBBBBBBB; //0x28 free bytes in RAM
+	struct Wild_enocunter_tbl *encounter_tbl = (struct Wild_enocunter_tbl *)ENC_TBL_ADDR; //Start of encounter_tbl in ROM
+	struct Npc_show_countdown *npc_show_ctdwn = (struct Npc_show_countdown *)NPC_CTDWN_ADDR; 
 	
-	void *precompiled_script_slot = (void *))0xCCCCCCCC;		//0xE free bytes in RAM
+	void *precompiled_script_slot = (void *)PREC_SCRIPT_SLOT;		
 	void *precompiled_script_slot_iterable = precompiled_script_slot;
 	
 	struct Script_state *env1 = (struct Script_state *)0x03000EB0;

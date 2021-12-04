@@ -1,3 +1,6 @@
+#ifndef NPC_STATE_H
+#define NPC_STATE_H
+
 struct Coord {
 	u16 x;
 	u16 y;
@@ -32,3 +35,5 @@ struct Npc_state {
 	/*OFF: 0x22 */u8 field_22;
 	/*OFF: 0x23 */u8 field_23;
 };
+
+#endif

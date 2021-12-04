@@ -1,3 +1,6 @@
+#ifndef SCRIPT_STATE_H
+#define SCRIPT_STATE_H
+
 struct Script_state{
 	u8  sub_scripts_count;
 	u8  continue_exec;
@@ -9,3 +12,5 @@ struct Script_state{
 	u32 last_cmd_ptr;
 	u32 memory_banks[4];
 };
+
+#endif
