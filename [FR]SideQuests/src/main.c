@@ -68,6 +68,9 @@ void quest_gui_handler(){
 				quest_gui_info->page_start_quest_i = 0;
 				quest_gui_info->page_end_quest_i = 0;
 				quest_gui_info->mode = QUEST_GUI_ACTIVE;
+				for (u8 i=0; i<GUI_ENTRIES_PER_PAGE; i++){ //Init to empty
+					quest_gui_info->npc_oam_ids[i] = 0;
+				}
 				
 				super.multi_purpose_state_tracker++;;
 			}
