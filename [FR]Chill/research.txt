@@ -92,3 +92,14 @@ ora torniamo al danno
 tutto il danno è minuscolo, indago su cosa faccia modificare r5
 diocan non devi modificare r5! hai sbagliato idea perchè sei fatto
 il valore di attacco speciale è contenuto in r8 a 0803f3ca
+
+ora manca il chp damage finale
+cerco cosa fa burn
+bpr 0x2023C30 1
+
+> 080234b6  2020 mov r0, #0x20
+> 08013b62  2107 mov r1, #0x7
+> 08014e56  2140 mov r1, #0x40
+> 0801848a  2108 mov r1, #0x8
+> 080184d4  2180 mov r1, #0x80
+> 08018552  2110 mov r1, #0x10 -> burn
