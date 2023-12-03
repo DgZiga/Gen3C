@@ -1,0 +1,94 @@
+
+0803EE0C nope
+
+
+REQUEST_STATUS_AILMENT = 0x37
+
+02024020 b_cur_move_power
+
+A 0803ed6e r6 c'è battle_data, breakpoint lì e scopriamo
+battle_data starts at 02023BE4.
+0x2023C88 = battle_data + 0x58 (sizeof(battle_data)) + 0x4C (status1), in altre parole lo status1 del secondo pkmn del battle_data
+
+è una word
+0x00000007  -> Sleep (up to 7 turns)
+0x00000008  -> poison
+0x00000010  -> burn
+0x00000020  -> freeze
+0x00000040  -> paralyze
+0x00000080  -> badly poisoned
+
+
+bpr 0x2023C88 1
+08014f38 prima di tutto
+0803f2fa subito dopo attacco
+
+Tra fine mio attacco e inizio suo
+> 080234b6  2020 mov r0, #0x20
+> 080193b8  2207 mov r2, #0x7
+> 080194f2  2120 mov r1, #0x20
+> 08019908  2140 mov r1, #0x40
+> 08019b50  2020 mov r0, #0x20
+> 0803f2fa  2110 mov r1, #0x10
+
+direi 0803f2fa che muove burn in r1
+quindi 0803F302 se è burnt
+cariuca in r1 R01=02023c5c
+
+
+02023c5c è battle data(02023BE4) + 0x78 offset
+ogni battle_data è 0x58, quindi è il 0x20 del secondo battle_data, ovvero ability
+in definitiva controlla con 0803F306 se l'abilità sia guts
+questo mette in r5 il valore di attacco dopo burn
+
+0803F3F6 siamo in regno di spatk, 
+0803F29A physatk
+
+Boh, provo a inserire un fork a 0803F3FA e cambiare il valore di r5
+
+
+
+
+per testare dfevo rimuovre condizione che non mi fa muovere
+
+bpr 0x2023C88 1 su pkmn congelato:
+
+> 08014f38  2140 mov r1, #0x40 appena premuta mossa
+
+NON FUNZIONA! il secondo pokèmon del battle_data (che stiamo leggendo) è quello avversario, dobbiamo shiftare di -1*sizeof(battle_data) l'indirizzo per leggere quello del nostro pkmn
+02023BE4 (battle_data) + 0x4C (status1) = 0x2023C30 status1 del primo pkmn
+
+
+bpr 0x2023C30 1 su pkmn congelato:
+> 08014e56  2140 mov r1, #0x40
+> 080193b8  2207 mov r2, #0x7
+> 080194f2  2120 mov r1, #0x20
+> 0800e012  7018 strb r0, [r3, #0x0]
+poi msg "is frozen"
+
+
+parto da 080194f2 è un r1, #0x20 (freeze) e che avevo visto anche sul pkmn avversario
+a 080194FA c'è un bl rand che con ogni probabilità è il thaw out
+
+
+Oltre a far fare thaw out io devo evitare che venga resettata la condizione di status1:
+bpw 0x2023C30 1
+08019568 unico momento
+se provo a evitare di fare quello store esplode tutto, provo a riprendere da 8019B90
+crash
+
+non sto capendo perchè si impalla
+parto ad analizzare da 0x08019558 (appena ha deciso che è thaw out)
+carica un byte da R07=02023d6b (b_attacker)
+moltiplica quel b_attacker per 0x58 (r6) e ci aggiunge r5 (R05=2023c30)
+
+quindi legge l'indirizzo dello status1 del primo battle_data, e ci aggiunge sizeof(battle_data) * b_attacker
+
+a fine di tutta sta routein fa bx rq (r1=0801d7cd), vediamo se funzia
+NO MA RISALENDO UN PO' POSSIAMO ANDARE A 08019BD4 E SKIPPARE TUTTOOOOO
+
+
+ora torniamo al danno
+tutto il danno è minuscolo, indago su cosa faccia modificare r5
+diocan non devi modificare r5! hai sbagliato idea perchè sei fatto
+il valore di attacco speciale è contenuto in r8 a 0803f3ca

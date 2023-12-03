@@ -3,4 +3,4 @@
 *.bak
 *.sgm
 *.zip
-build*
+build/*
