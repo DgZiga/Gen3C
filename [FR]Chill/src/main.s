@@ -22,7 +22,6 @@ BX r0
 .org 0x08018552 ;1/16th damage if frozen. r0 contains the status
 .thumb
 .align 2
-;just changing r4 to 0 would thaw the pkmn out, but its not enough and we need to actually skip the animations and everything else
 LDR r1, =chip_damage_when_chill|1
 BX r1
 .pool
