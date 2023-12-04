@@ -2,13 +2,13 @@
 .thumb
 .open "./BPRE0.gba","./multi.gba", 0x08000000
 
-.org 0x0803F3D0 ;insert hijack when spatk is used. r6 contains battle_data, r8 contains the spatk
+.org 0x0803ED76 ;insert hijack when spatk is used. r6 contains battle_data
 .thumb
 .align 2
-LDR r5, =halve_spatk_when_chill|1
-BX r5
+LDR r3, =halve_spatk_when_chill|1
+BX r3
 .pool
-;override lasts until 0x0803F3D8(ecluded)
+;override lasts until 0x0803ED80(ecluded)
 
 
 .org 0x0801950A ;always thaw out
@@ -34,34 +34,32 @@ BX r1
 .align 2
 
 halve_spatk_when_chill:
+	LDRH r3, [R6,#8] ;original 0803ED76, load spatk
 	PUSH {r0-r1}
 	MOV r1, #0x4C ;battle_data.status1
 	LDR r0, [r6, r1]
 	MOV r1, #0x20 ;freeze
 	CMP r0, r1
 	BNE halve_spatk_when_chill_back_to_normal
-	mov r5, r8
-	LSR r5, #0x1
-	mov r8, r5
+	LSR r3, #0x1
 	B halve_spatk_when_chill_back_to_normal
 
 /*
 original:
-ROM:0803F3D0                 MOV     R5, R8
-ROM:0803F3D2                 MULS    R5, R1
-ROM:0803F3D4                 ADDS    R2, #1
-ROM:0803F3D6                 ADDS    R0, R0, R2
-ROM:0803F3D8                 LDRB    R1, [R0]
+ROM:0803ED76    LDRH    R3, [R6,#battle_data_t.stats+6] @ spatk ALREADY IN BEGINNING OF halve_spatk_when_chill
+ROM:0803ED78    MOV     R8, R3
+ROM:0803ED7A    LDR     R0, [SP,#0x4C+battle_data_defender]
+ROM:0803ED7C    LDRH    R0, [R0,#battle_data_t.stats+8]
+ROM:0803ED7E    STR     R0, [SP,#0x4C+var_34]
 */
 halve_spatk_when_chill_back_to_normal:
 	POP {r0-r1}
-	mov r5, r8
-	MUL r5, r1
-	ADD r2, #1
-	ADD r0, r2
-	LDRB r1, [r0]
-	LDR r0, =0x0803F3DA|1
-	BX r0
+	MOV r8, r3
+	LDR r0, [SP, #0x4]
+	LDRH r0, [R0, #0xA]
+	STR r0, [SP,#0x18]
+	LDR r1, =0x0803ED80|1
+	BX r1
 	
 
 

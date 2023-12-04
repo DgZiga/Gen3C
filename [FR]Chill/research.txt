@@ -90,7 +90,7 @@ NO MA RISALENDO UN PO' POSSIAMO ANDARE A 08019BD4 E SKIPPARE TUTTOOOOO
 
 ora torniamo al danno
 tutto il danno è minuscolo, indago su cosa faccia modificare r5
-diocan non devi modificare r5! hai sbagliato idea perchè sei fatto
+non devi modificare r5! 
 il valore di attacco speciale è contenuto in r8 a 0803f3ca
 
 ora manca il chp damage finale
@@ -103,3 +103,25 @@ bpr 0x2023C30 1
 > 0801848a  2108 mov r1, #0x8
 > 080184d4  2180 mov r1, #0x80
 > 08018552  2110 mov r1, #0x10 -> burn
+
+
+
+
+funziona tutto
+
+MA
+
+Con il phys/special Split di DoesntKnowHowToPlay e Dreamaker vengono apportati dei cambiamenti attorno all'area dove facciamo hijack per halve_dmg (0x0803F3D0).
+
+i cambiamenti partono a 0x0803F264 fino a 0x0803F4C4, sono tipo 300 istruzioni ed è impensabile guardarle 1:1 perchè riscrive completamente tutto quanto
+MA
+posso provare a inserire l'hijack in un punto dove la patch non tocca!
+provo a cercare da dove arriva quell'attacco speciale che abbiamo in r8 a 0x0803F3D0
+
+ bpr 0x02023BEC 2 <-spatk nostro pkmn in battle_data
+
+> 0803ed78  4698 mov r8, r3
+
+unico punto: da lì legge tutte le stat, a 0803ED76 legge spatk
+E' uguale anche post-patch, posso inserire qui l'hijack
+Funziona, gj
