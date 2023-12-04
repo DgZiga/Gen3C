@@ -5,8 +5,8 @@
 .org 0x0803F3D0 ;insert hijack when spatk is used. r6 contains battle_data, r8 contains the spatk
 .thumb
 .align 2
-LDR r0, =halve_spatk_when_chill|1
-BX r0
+LDR r5, =halve_spatk_when_chill|1
+BX r5
 .pool
 ;override lasts until 0x0803F3D8(ecluded)
 
@@ -34,7 +34,7 @@ BX r1
 .align 2
 
 halve_spatk_when_chill:
-	PUSH {r1}
+	PUSH {r0-r1}
 	MOV r1, #0x4C ;battle_data.status1
 	LDR r0, [r6, r1]
 	MOV r1, #0x20 ;freeze
@@ -54,7 +54,7 @@ ROM:0803F3D6                 ADDS    R0, R0, R2
 ROM:0803F3D8                 LDRB    R1, [R0]
 */
 halve_spatk_when_chill_back_to_normal:
-	POP {r1}
+	POP {r0-r1}
 	mov r5, r8
 	MUL r5, r1
 	ADD r2, #1
