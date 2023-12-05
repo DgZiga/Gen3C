@@ -31,7 +31,7 @@ BX r1
 .word new_msg
 .pool
 
-.org 0x08810000 ;Freeespace
+.org freespace ;Freeespace
 .thumb
 .align 2
 

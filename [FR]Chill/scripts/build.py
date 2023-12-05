@@ -66,6 +66,15 @@ def run_glob(globstr, fn):
     return map(fn, files)
  
 def main():
+    if len(sys.argv) < 2:
+        print("No custom address for the compiled code has been set.")
+        print("To add a custom address simply put it after the python executable name, like so: python scripts/build.py 0x08800000.")
+        print("Aborting...")
+        return
+
+    customAddr = sys.argv[1]
+    print("Inserting code at "+customAddr)
+
     globs = {
         #'**/*.s': process_assembly,
         '**/*.c': process_c
@@ -86,7 +95,7 @@ def main():
     objcopy(linked)
 	
 	#ARMPIS
-    cmd = ['armips', './src/main.s','-sym','symbols.txt']
+    cmd = ['armips', './src/main.s','-sym','symbols.txt', '-equ', 'freespace', '0x08810000']
     run_command(cmd)
  
 if __name__ == '__main__':
