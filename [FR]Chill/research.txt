@@ -125,3 +125,6 @@ provo a cercare da dove arriva quell'attacco speciale che abbiamo in r8 a 0x0803
 unico punto: da lì legge tutte le stat, a 0803ED76 legge spatk
 E' uguale anche post-patch, posso inserire qui l'hijack
 Funziona, gj
+
+Cambiamo il messaggio: 3FB663 (63 B6 3F 08) è l'offset del msg, sembra richiamato solo da 3FDFCC
+Cambiando quel pointer funziona tutto

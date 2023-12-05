@@ -27,6 +27,9 @@ BX r1
 .pool
 ;override lasts until 0x0801855A(ecluded)
 
+.org 0x083FDFCC ;change text for 1/16th damage
+.word new_msg
+.pool
 
 .org 0x08810000 ;Freeespace
 .thumb
@@ -59,7 +62,7 @@ halve_spatk_when_chill_back_to_normal:
 	STR r0, [SP,#0x18]
 	LDR r1, =0x0803ED80|1
 	BX r1
-	
+
 
 
 
@@ -90,6 +93,45 @@ chip_damage_when_chill_back_to_normal:
 	bne chip_damage_when_chill_apply_dmg
 	ldr r0, =0x8018C12|1
 	bx r0
+
+new_msg:
+.byte 0xFD
+.byte 0x0F
+.byte 0x00
+.byte 0xDD
+.byte 0xE7
+.byte 0x00
+.byte 0xDC
+.byte 0xE9
+.byte 0xE6
+.byte 0xE8
+.byte 0xFE
+.byte 0xD6
+.byte 0xED
+.byte 0x00
+.byte 0xDD
+.byte 0xE8
+.byte 0xE7
+.byte 0x00
+.byte 0xE7
+.byte 0xE8
+.byte 0xD5
+.byte 0xE8
+.byte 0xE9
+.byte 0xE7
+.byte 0x00
+.byte 0xD7
+.byte 0xE3
+.byte 0xE2
+.byte 0xD8
+.byte 0xDD
+.byte 0xE8
+.byte 0xDD
+.byte 0xE3
+.byte 0xE2
+.byte 0xAB
+.byte 0xFF
+.byte 0x00
 
 
 .pool
