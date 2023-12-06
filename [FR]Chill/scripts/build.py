@@ -95,7 +95,7 @@ def main():
     objcopy(linked)
 	
 	#ARMPIS
-    cmd = ['armips', './src/main.s','-sym','symbols.txt', '-equ', 'freespace', '0x08810000']
+    cmd = ['armips', './src/main.s','-sym','symbols.txt', '-equ', 'freespace', customAddr]
     run_command(cmd)
  
 if __name__ == '__main__':
