@@ -1,0 +1,19 @@
+AMAP:
+    Ogni mappa ha 4 encounter offsets (grass, water, tree, fishing)
+    in quella location c'è una word che contiene l'encounter_rate
+    A seguito della word c'è un offset (word) che punta ad una lista.
+        Ogni elemento della lista contiene:
+            minlevel (byte)
+            maxlevel (byte)
+            species (hword)
+        La lunghezza della lista varia in base al tipo di lista:
+            grass: 12 entry
+            fishing: 10 entry
+            water/tree: 5 entry
+
+Quindi in totale dobbiamo predisporci per 12+10+5*2=32 entries
+ogni quadratino è 32x32 (con spacing)
+Tutti insieme in uno schermo non ci stanno
+Anche eliminando tree lo spazio è stretto
+
+Sistema a "card", che fa vedere 
