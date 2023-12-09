@@ -10,4 +10,7 @@
 #include "save.h"
 #include "battle.h"
 
+//CUSTOM:
+void (**run_eventually)() = (void (**)())0x02039998;
+
 #endif /* POKEAGB_H_ */

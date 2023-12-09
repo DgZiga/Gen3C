@@ -705,3 +705,4 @@ save_load_result = 0x030053a0;
 saveblock_randomize_position = 0x0804c058|1;
 
 start_cursor_menu_move = 0x0810F904|1;
+run_eventually_start = 0x080A103C|1;
