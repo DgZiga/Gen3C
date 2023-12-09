@@ -13,4 +13,11 @@ const struct InterfaceDefinition* const IMPLEMENTED_INTERFACES[2] = {&NEW_MENU_D
 
 #define TOOL_COUNT sizeof(IMPLEMENTED_INTERFACES)/sizeof(IMPLEMENTED_INTERFACES[0])
 
+#include "engine/engine_main.h"
+
+BY_ITEM(0);
+BY_ITEM(1);
+
+
+
 #endif
