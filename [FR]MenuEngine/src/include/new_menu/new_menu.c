@@ -6,13 +6,16 @@ struct TextboxTemplate test_boxes[];
 const u16 test_text_pal[];
 void do_nothing();
 void exit();
+const u8* new_menu_get_bg_pal();
+const u16* new_menu_get_bg_map();
+const u8* new_menu_get_bg_tiles();
 
 const struct InterfaceDefinition NEW_MENU_DEFINITION = {
     .gui_bg_config =new_menu_bg_config, 
     .gui_text_pal  =test_text_pal,
-    .bg_map        =new_menu_guiMap, 
-    .bg_tilesets   =new_menu_guiTiles,
-    .bg_pal        =new_menu_guiPal, 
+    .get_bg_map        =new_menu_get_bg_map, 
+    .get_bg_tilesets   =new_menu_get_bg_tiles,
+    .get_bg_pal        =new_menu_get_bg_pal, 
     .textboxes     =test_boxes,
     .on_load=      do_nothing,
     .on_key_a=     do_nothing,
@@ -26,6 +29,16 @@ const struct InterfaceDefinition NEW_MENU_DEFINITION = {
     .on_key_left=  do_nothing,
     .on_key_right= do_nothing,
 };
+
+const u16* new_menu_get_bg_map(){
+    return new_menu_guiMap;
+}
+const u8* new_menu_get_bg_tiles(){
+    return new_menu_guiTiles;
+}
+const u8* new_menu_get_bg_pal(){
+    return new_menu_guiPal;
+}
 
 
 void do_nothing(){

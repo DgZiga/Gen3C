@@ -49,9 +49,9 @@ void gui_handler(){
 			void *quest_gbackbuffer = malloc(0x800);
 			//(*DNavState)->backbuffer = dexnav_gbackbuffer;
 			gpu_pal_apply((void *)(&def.gui_text_pal), 15 * 16, 32);
-			gpu_pal_apply_compressed((void *)def.bg_pal, 0, 32);
-			LZ77UnCompWram((void *)def.bg_map, (void *)quest_gbackbuffer);
-			lz77UnCompVram((void *)def.bg_tilesets, (void *)0x06000000);
+			gpu_pal_apply_compressed((void *)(def.get_bg_pal()), 0, 32);
+			LZ77UnCompWram((void *)(def.get_bg_map()), (void *)quest_gbackbuffer);
+			lz77UnCompVram((void *)(def.get_bg_tilesets()), (void *)0x06000000);
 			bgid_set_tilemap(1, quest_gbackbuffer);
 			bgid_mark_for_sync(1);
 			bgid_mark_for_sync(0);

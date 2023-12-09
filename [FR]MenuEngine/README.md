@@ -8,4 +8,4 @@ Se viene scelta un'opzione del menù temporaneo, il controllo passa all'engine c
 TODOS:
 Nome menu che si riflette sul menu configurabile
 Callabile da oggetto
-Bg deve essere una func provider per customizzarla
+Bg deve essere una func provider per customizzarla FATTO
