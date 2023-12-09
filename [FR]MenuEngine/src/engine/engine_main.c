@@ -69,7 +69,7 @@ void gui_handler(){
 				super.multi_purpose_state_tracker++;
 			}
 		case 3: {//Display OWs 
-
+			def.on_load();
 			super.multi_purpose_state_tracker++;
 		}
 		case 4: // Show screen
