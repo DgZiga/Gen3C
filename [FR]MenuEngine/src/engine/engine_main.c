@@ -3,10 +3,8 @@
 
 #include "engine_main.h"
 
-
-int new_menu_main(const struct InterfaceDefinition* def) {
+int new_gui_main(const struct InterfaceDefinition* def) {
     *interface_def_addr = def;
-    close_startmenu();
     fade_screen(0xFFFFFFFF, 0, 0, 16, 0x0000);
     void gui_handler(void);
     set_callback1(gui_handler);

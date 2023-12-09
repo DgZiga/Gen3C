@@ -41,7 +41,8 @@ bool make_choice(u32 choice_id) {//true=action happended, false=id is not mapped
     if (choice_id > sizeof(IMPLEMENTED_INTERFACES) / sizeof(IMPLEMENTED_INTERFACES[0])) {// OutOfBounds
         return false;
     } 
-    new_menu_main(IMPLEMENTED_INTERFACES[choice_id]);
+    close_startmenu();
+    new_gui_main(IMPLEMENTED_INTERFACES[choice_id]);
     return true;
 }
 
