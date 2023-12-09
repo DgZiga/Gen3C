@@ -63,6 +63,14 @@ def process_img(in_file):
     '''Compile IMGs'''
     # imgs are first converted to .c/.h files, then built like the rest of the source code
     out_file = os.path.join(os.path.dirname(in_file), '..', 'built_graphics', os.path.basename(in_file))#os.path.join(os.chdir, os.path.basename(in_file))
+    
+    try:
+        os.makedirs(os.path.dirname(out_file))
+    except FileExistsError:
+        pass
+
+    print(out_file)
+    print(os.path.abspath(out_file))
     cmd = ['grit', in_file, '-o', out_file] + GRITFLAGS
     run_command(cmd)
     return out_file
