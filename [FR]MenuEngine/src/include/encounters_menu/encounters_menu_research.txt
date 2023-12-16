@@ -1,0 +1,26 @@
+Fare i display sprite:
+    non funziona la func che aveo sccritto, il gioco normale legge l'asset a 081e3b64 (08070406) 
+    siamo a gpu_pal_apply (080089b3), a sua volta chiamato da
+    gpu_pal_obj_load(080089b3),  a sua volta chiamato da
+    gpu_pal_obj_alloc_tag_and_apply(0800895f). All'inzio di questa func in r0 c'è struct SpritePalette* pal
+    a sua volta chiamato da 0809708a (unnamed routine)
+
+    Questa sub (sub_809707C) itera sui primi 5 di stru_83D4038, per poi chiamare gpu_pal_obj_alloc_tag_and_apply su ognuno.
+    la struct è tipo {
+        u32 addr;
+        u16 pal_tag;
+        u16 filler;
+    }
+    chiamato da R00=0811ed4f. Questa (parte a 0811EBFC) è una funzione che usa il super.multi_puropose_tracker per andare avanti. voglio morire
+
+
+
+
+
+
+
+    BREAK
+
+    08097028 conteine un pointers agli sprite dei menu e viene chiamato 6 volte
+, sempre da 08097068
+da 08096e4c

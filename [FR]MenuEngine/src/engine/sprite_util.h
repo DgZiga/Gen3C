@@ -21,4 +21,6 @@ extern u8 display_compressed_sprite(u8 sprite_w, u8 sprite_h, u8 sprite_x, u8 sp
 
 extern u8 display_npc(u8 oam_id, u8 sprite_x, u8 sprite_y, u8 tiles_tag);
 
+extern u8 display_pokemon_icon(u16 species, s16 x, s16 y);
+
 #endif

@@ -17,3 +17,58 @@ Tutti insieme in uno schermo non ci stanno
 Anche eliminando tree lo spazio è stretto
 
 Sistema a "card", che fa vedere 
+
+cerco encounter table
+a 08082D1E (in mezzo a check per encounter in erba alta) fa
+
+ROM:08082D1E                 LDR     R1, =wild_pokemon_data
+ROM:08082D20                 ADDS    R0, R5, R4
+ROM:08082D22                 LSLS    R0, R0, #2
+ROM:08082D24                 ADDS    R1, #wild_pokemon_distribution.grass
+ROM:08082D26                 ADDS    R4, R0, R1
+ROM:08082D28                 LDR     R0, [R4]
+
+chiaro che in r5 e r4 ci sono i riferimenti al pokemon attuale
+
+
+per generare pokemon casuale, fa
+ROM:08082D64                 BL      wild_pokemon_for_domain @ r0=grass of this wild_encounter
+ROM:08082D64                                         @ r1=0?
+ROM:08082D64                                         @ r2=1?
+
+dove r0 è quello calcolato a 08082D28.
+usa r1=0 per indicare hce vuole gli incontri di grass
+quindi chiama wild_pokemon_rand_grass per rollare il dado e avere un indice. 
+Arriva a 08082B20
+
+
+
+
+
+a 083D37A0 c'è la table con le icone (extern const u8 pokeicon_table[410][POKEAGB_POKEMON_ICON_SIZE];)
+
+08D2FE78 palc_normal_bulbasaur
+refereced by
+0823730C palc_table_normal
+
+
+dal dexnav rubo
+
+
+    // check which palette the species icon uses
+    u8 icon_pal = pokeicon_pal_indices[species];
+    struct SpritePalette bulbpal = {(u8*)&(pokeicon_pals[icon_pal]), 0x3139};
+    gpu_pal_obj_alloc_tag_and_apply(&bulbpal);
+
+    u32 pid = rand_range(0, 0xFFFF) | rand_range(0, 0xFFFF) << 16;
+    void *icon_gfx = load_party_icon_tiles_with_form(species, pid, false);
+    struct SpriteTiles bulbicon = {icon_gfx, 4 * 8 * 32, 0x3139};
+    gpu_tile_obj_alloc_tag_and_upload(&bulbicon);
+
+    // create object
+    u8 obj_id = template_instanciate_forward_search(&bulbtemp, ICONX, ICONY, 0x0);
+    *objid = obj_id;
+    //dprintf("address is: %x\n", objects[obj_id].image);
+    dprintf("address is: %x\n", &picon_oam);
+    objects[obj_id].final_oam.affine_mode = 2;
+    objects[obj_id].final_oam.obj_mode = 1;

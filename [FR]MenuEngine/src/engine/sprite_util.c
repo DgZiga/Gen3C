@@ -9,7 +9,6 @@ u8 display_sprite(u8 sprite_w, u8 sprite_h, u8 sprite_x, u8 sprite_y,
 					u16 tiles_tag, void *ptr_to_tile,
 					u16 pals_tag,  void *ptr_to_pal,
 					u8 filp_h, u8 flip_v){
-						
 	struct ShapeSize shsi = shapeSizeFromWidthAndHeight(sprite_w, sprite_h);
 	const struct OamData map_data = {
 		.affine_mode = 0,
@@ -42,7 +41,6 @@ u8 display_sprite(u8 sprite_w, u8 sprite_h, u8 sprite_x, u8 sprite_y,
 									};
 	gpu_tile_obj_alloc_tag_and_upload(&tiles);
 	gpu_pal_obj_alloc_tag_and_apply(&pals);
-	
 	return template_instanciate_forward_search(&icon_template, sprite_x, sprite_y, 0);
 }
 
@@ -97,6 +95,16 @@ u8 display_npc(u8 oam_id, u8 sprite_x, u8 sprite_y, u8 tiles_tag){
 	return display_sprite(oam->width, oam->height, sprite_x, (oam->height == 0x10 ? sprite_y +8 : sprite_y),
 						  tiles_tag, ptr_to_first_sprite,
 						  oam->palTag, findOamPalEntryByTag(oam->palTag)->pal_ptr, 0, 0);
+}
+
+
+extern u8 __attribute__((long_call)) CreateMonIcon(u16 species, void (*callback)(void *), s16 x, s16 y, u8 subpriority, u32 personality, bool extra);
+extern void __attribute__((long_call)) LoadMonIconPalette(u16 species);
+u8 display_pokemon_icon(u16 species, s16 x, s16 y){
+    void (*callback)(void *) = (void (*)(void *)) (0x809718C|1); //Stolen from 0804CA8A
+    LoadMonIconPalette(species);
+    return CreateMonIcon(species, callback, x, y, 0, 0, 0);
+    
 }
 
 #endif

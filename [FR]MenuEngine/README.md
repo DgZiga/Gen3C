@@ -8,5 +8,8 @@ Se viene scelta un'opzione del menù temporaneo, il controllo passa all'engine c
 TODOS:
 Nome menu che si riflette sul menu configurabile
 Callabile da oggetto FATTO (La macro BY_ITEM prende un id dell'array di feature implementate e crea 3 funzioni La funzione gui_##id##_new_gui_by_item se messa come offset di un item apre quella gui)
+inserimento al posto dell'oggetto automatico?
 Bg deve essere una func provider per customizzarla FATTO
 grafichetta swap? whynot
+
+in this demo, the teachy tv redirects to gui_1 (main.s)

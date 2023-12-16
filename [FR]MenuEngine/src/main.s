@@ -46,4 +46,9 @@ menu_text:
 
 .pool
 
+.org 0x83DEF2C
+.thumb
+.align 2
+.word gui_1_new_gui_by_item|1;
+.pool
 .close

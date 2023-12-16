@@ -442,6 +442,8 @@ rotscale_empty = 0x08231cfc;
 rotscale_reset = 0x08008560|1;
 template_instanciate_forward_search = 0x08006f8c|1;
 template_instanciate_reverse_search = 0x08006fe0|1;
+CreateMonIcon = 0x8096E18 | 1;
+LoadMonIconPalette =0x80970E0 | 1;
 
 /*
  * include/pokeagb/misc/titlescreen.h
@@ -658,10 +660,12 @@ species_to_pokedex_index = 0x08043298|1;
 gfx_heldicons = 0x0845a3ac;
 load_party_icon_palette_index = 0x080971f8|1;
 load_party_icon_tiles_with_form = 0x08097054|1;
+get_icon_pal = 0x080971CC|1;
 pal_heldicons = 0x0845a3ec;
 pokeicon_pal_indices = 0x083d3e80;
 pokeicon_pals = 0x083d3740;
 pokeicon_table = 0x083d37a0;
+working_pokeicon_table = 0x083d37a0;
 storage_hand_palette = 0x083d2bcc;
 storage_hand_template = 0x083d350c;
 storage_hand_tiles = 0x083d2bec;
