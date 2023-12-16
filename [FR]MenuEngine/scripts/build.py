@@ -62,15 +62,14 @@ def process_c(in_file):
 def process_img(in_file):
     '''Compile IMGs'''
     # imgs are first converted to .c/.h files, then built like the rest of the source code
-    out_file = os.path.join(os.path.dirname(in_file), '..', 'built_graphics', os.path.basename(in_file))#os.path.join(os.chdir, os.path.basename(in_file))
+    out_file = os.path.join(os.path.dirname(in_file), '..', 'built_graphics', os.path.basename(in_file))
     
     try:
         os.makedirs(os.path.dirname(out_file))
     except FileExistsError:
         pass
 
-    print(out_file)
-    print(os.path.abspath(out_file))
+    print('Running Grit on '+os.path.abspath(out_file))
     cmd = ['grit', in_file, '-o', out_file] + GRITFLAGS
     run_command(cmd)
     return out_file
@@ -118,9 +117,15 @@ def main():
     clear_folder(BUILD)
     clear_folder(BUILT_GRAPHICS)
     
-    files = glob(os.path.join(ROOT, '**/*.png'), recursive=True)
-    for file in files:
-        process_img(file)
+    img_globs = {
+        './**/*.png',
+        './**/*.bmp'
+    }
+
+    for globstr in img_globs:
+        files = glob(os.path.join(ROOT, globstr), recursive=True)
+        for file in files:
+            process_img(file)
 
     globs = {
         '**/*.c': process_c
@@ -136,6 +141,7 @@ def main():
 	#ARMPIS
     cmd = ['armips', './src/main.s','-sym','symbols.txt', '-equ', 'freespace', customAddr]
     run_command(cmd)
+    print("DONE")
  
 if __name__ == '__main__':
     main()
