@@ -196,83 +196,99 @@ void encounters_menu_on_load(){
         return;
     }
     struct map_wild_pokemon_data curr_data = wild_pokemon_data[wild_encounter_id];
+    u8 x_off = 0;
+    u8 y_off = 0;
+
+    
     //Handle grass
-    struct wild_pokemon *grass_encounters = curr_data.grass_encounter->wild_encounters->wild_grass;
-    u16 grass_different_species[GRASS_ENCOUNTERS] = {EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES};
-    for(u8 i=0; i<GRASS_ENCOUNTERS; i++){
-        if(!species_array_contains(grass_different_species, GRASS_ENCOUNTERS, grass_encounters[i].species)){
-            populate_species_array(grass_different_species, GRASS_ENCOUNTERS, grass_encounters[i].species);
+    if(curr_data.grass_encounter != 0){
+        struct wild_pokemon *grass_encounters = curr_data.grass_encounter->wild_encounters->wild_grass;
+        u16 grass_different_species[GRASS_ENCOUNTERS] = {EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES};
+        for(u8 i=0; i<GRASS_ENCOUNTERS; i++){
+            if(!species_array_contains(grass_different_species, GRASS_ENCOUNTERS, grass_encounters[i].species)){
+                populate_species_array(grass_different_species, GRASS_ENCOUNTERS, grass_encounters[i].species);
+            }
         }
-    }
-    u8 x_off = LEFT_MARGIN;
-    u8 y_off = 16;
-    for(u8 i=0; i<sizeof(grass_different_species)/sizeof(grass_different_species[0]); i++){
-        if(grass_different_species[i] != EMPTY_SPECIES){
-            display_pokemon_icon(grass_different_species[i], x_off, y_off++);
-            x_off+=ICON_W;
-            if(x_off >= LEFT_MARGIN+ICON_W*GRASS_ENCOUNTERS/2){
-                x_off = LEFT_MARGIN;
-                y_off += 24;
+        x_off = LEFT_MARGIN;
+        y_off = 16;
+        for(u8 i=0; i<sizeof(grass_different_species)/sizeof(grass_different_species[0]); i++){
+            if(grass_different_species[i] != EMPTY_SPECIES){
+                display_pokemon_icon(grass_different_species[i], x_off, y_off++);
+                x_off+=ICON_W;
+                if(x_off >= LEFT_MARGIN+ICON_W*GRASS_ENCOUNTERS/2){
+                    x_off = LEFT_MARGIN;
+                    y_off += 24;
+                }
             }
         }
     }
+
+
     
     //Handle water
-    struct wild_pokemon *water_encounters = curr_data.water_encounter->wild_encounters->wild_water;
-    u16 water_different_species[WATER_ENCOUNTERS] = {EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES};
-    for(u8 i=0; i<WATER_ENCOUNTERS; i++){
-        if(!species_array_contains(water_different_species, WATER_ENCOUNTERS, water_encounters[i].species)){
-            populate_species_array(water_different_species, WATER_ENCOUNTERS, water_encounters[i].species);
+    if(curr_data.water_encounter != 0){
+        struct wild_pokemon *water_encounters = curr_data.water_encounter->wild_encounters->wild_water;
+        u16 water_different_species[WATER_ENCOUNTERS] = {EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES};
+        for(u8 i=0; i<WATER_ENCOUNTERS; i++){
+            if(!species_array_contains(water_different_species, WATER_ENCOUNTERS, water_encounters[i].species)){
+                populate_species_array(water_different_species, WATER_ENCOUNTERS, water_encounters[i].species);
+            }
         }
-    }
-    x_off = LEFT_MARGIN;
-    y_off = 70;
-    for(u8 i=0; i<sizeof(water_different_species)/sizeof(water_different_species[0]); i++){
-        if(water_different_species[i] != EMPTY_SPECIES){
-            display_pokemon_icon(water_different_species[i], x_off, y_off++);
-            x_off+=ICON_W;
+        x_off = LEFT_MARGIN;
+        y_off = 70;
+        for(u8 i=0; i<sizeof(water_different_species)/sizeof(water_different_species[0]); i++){
+            if(water_different_species[i] != EMPTY_SPECIES){
+                display_pokemon_icon(water_different_species[i], x_off, y_off++);
+                x_off+=ICON_W;
 
-        }
-    }    
-    
-    //Handle fish
-    struct wild_pokemon *fish_encounters = curr_data.fishing_encounter->wild_encounters->wild_fishing;
-    u16 fish_different_species[FISH_ENCOUNTERS] = {EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES};
-    for(u8 i=0; i<FISH_ENCOUNTERS; i++){
-        if(!species_array_contains(fish_different_species, FISH_ENCOUNTERS, fish_encounters[i].species)){
-            populate_species_array(fish_different_species, FISH_ENCOUNTERS, fish_encounters[i].species);
-        }
+            }
+        }    
     }
-    x_off = LEFT_MARGIN;
-    y_off = 96;
-    for(u8 i=0; i<sizeof(fish_different_species)/sizeof(fish_different_species[0]); i++){
-        if(fish_different_species[i] != EMPTY_SPECIES){
-            display_pokemon_icon(fish_different_species[i], x_off, y_off);
-            x_off+=ICON_W;
-            if(x_off >= LEFT_MARGIN+ICON_W*FISH_ENCOUNTERS/2){
-                x_off = LEFT_MARGIN;
-                y_off += 24;
+
+
+    //Handle fish
+    if(curr_data.fishing_encounter != 0) {
+        struct wild_pokemon *fish_encounters = curr_data.fishing_encounter->wild_encounters->wild_fishing;
+        u16 fish_different_species[FISH_ENCOUNTERS] = {EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES};
+        for(u8 i=0; i<FISH_ENCOUNTERS; i++){
+            if(!species_array_contains(fish_different_species, FISH_ENCOUNTERS, fish_encounters[i].species)){
+                populate_species_array(fish_different_species, FISH_ENCOUNTERS, fish_encounters[i].species);
+            }
+        }
+        x_off = LEFT_MARGIN;
+        y_off = 96;
+        for(u8 i=0; i<sizeof(fish_different_species)/sizeof(fish_different_species[0]); i++){
+            if(fish_different_species[i] != EMPTY_SPECIES){
+                display_pokemon_icon(fish_different_species[i], x_off, y_off);
+                x_off+=ICON_W;
+                if(x_off >= LEFT_MARGIN+ICON_W*FISH_ENCOUNTERS/2){
+                    x_off = LEFT_MARGIN;
+                    y_off += 24;
+                }
             }
         }
     }
 
+
     //Handle tree
-    struct wild_pokemon *tree_encounters = curr_data.tree_encounter->wild_encounters->wild_tree;
-    u16 tree_different_species[TREE_ENCOUNTERS] = {EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES};
-    for(u8 i=0; i<TREE_ENCOUNTERS; i++){
-        if(!species_array_contains(tree_different_species, TREE_ENCOUNTERS, tree_encounters[i].species)){
-            populate_species_array(tree_different_species, TREE_ENCOUNTERS, tree_encounters[i].species);
+    if(curr_data.tree_encounter != 0){
+        struct wild_pokemon *tree_encounters = curr_data.tree_encounter->wild_encounters->wild_tree;
+        u16 tree_different_species[TREE_ENCOUNTERS] = {EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES, EMPTY_SPECIES};
+        for(u8 i=0; i<TREE_ENCOUNTERS; i++){
+            if(!species_array_contains(tree_different_species, TREE_ENCOUNTERS, tree_encounters[i].species)){
+                populate_species_array(tree_different_species, TREE_ENCOUNTERS, tree_encounters[i].species);
+            }
         }
-    }
-    x_off = LEFT_MARGIN;
-    y_off = 96;
-    for(u8 i=0; i<sizeof(tree_different_species)/sizeof(tree_different_species[0]); i++){
-        if(tree_different_species[i] != EMPTY_SPECIES){
-            display_pokemon_icon(tree_different_species[i], x_off, y_off);
-            x_off+=ICON_W;
-            if(x_off >= LEFT_MARGIN+ICON_W*TREE_ENCOUNTERS/2){
-                x_off = LEFT_MARGIN;
-                y_off += 24;
+        x_off = LEFT_MARGIN;
+        y_off = 96;
+        for(u8 i=0; i<sizeof(tree_different_species)/sizeof(tree_different_species[0]); i++){
+            if(tree_different_species[i] != EMPTY_SPECIES){
+                display_pokemon_icon(tree_different_species[i], x_off, y_off);
+                x_off+=ICON_W;
+                if(x_off >= LEFT_MARGIN+ICON_W*TREE_ENCOUNTERS/2){
+                    x_off = LEFT_MARGIN;
+                    y_off += 24;
+                }
             }
         }
     }
