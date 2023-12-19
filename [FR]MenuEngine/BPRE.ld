@@ -496,6 +496,7 @@ currentmap_header = 0x02036dfc;
 exec_battle = 0x0807f748|1;
 get_map_name_index = 0x08056260|1;
 get_wild_data_index_for_map = 0x08082934|1;
+get_wild_data_index_for_map_working = 0x08082934|1;
 is_light_level_1_2_3_or_6__opensky = 0x080561fc|1;
 log_coords_relative_camera = 0x08063bc4|1;
 mapheader_by_mapnumbers = 0x08055238|1;
